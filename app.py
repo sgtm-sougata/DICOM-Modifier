@@ -72,7 +72,7 @@ if uploaded_file:
         if new_name and new_id:
             modified_zip = create_modified_zip(BytesIO(uploaded_file.read()), new_name, new_id)
             if modified_zip:
-                st.write("Modification complete.")
+                st.write("Preprocessing completed. You can download the processed file below:")
                 with open(modified_zip.name, 'rb') as f:
                     bytes = f.read()
                     b64 = base64.b64encode(bytes).decode()
