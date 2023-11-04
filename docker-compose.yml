@@ -1,14 +1,14 @@
-version: '3.8'
+version: '3'
 
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile 
+  web:
+    image: sougatamaity/dicom-modification:latest
+    container_name: dicom_modification
     ports:
-      - "8082:8082"
-    volumes:
-      - dcm-modifier:/app
+      - "8082:8501"
+    volumes: 
+      - dicom_modification:/app
+    restart: always 
 
 volumes:
-  dcm-modifier:
+  dicom_modification:
