@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile 
     ports:
-      - "8501:8501"
+      - "8082:8082"
     volumes:
       - dcm-modifier:/app
 
