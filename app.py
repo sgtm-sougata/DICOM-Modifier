@@ -9,12 +9,7 @@ from io import BytesIO
 import re
 
 
-# st.markdown("""<link type="image/png" sizes="16x16" rel="icon" href=".../icons8-link-edit-16.png">""", unsafe_allow_html=True)
-
-
-
 st.set_page_config(page_title="DICOM Modifier", page_icon="https://img.icons8.com/fluency/48/edit-link.png")
-
 
 # Function to modify DICOM data
 def modify_dicom_data(file, new_name, new_id):
