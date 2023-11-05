@@ -57,7 +57,7 @@ def create_modified_zip(zip_file, new_name, new_id):
 st.markdown("""
     <div style='display: flex; align-items: center;'>
         <img src='https://img.icons8.com/fluency/48/edit-link.png' style='width:48px;height:48px;'>
-        <h1 style='font-family: Arial; font-size: 24px;'>DICOM Modifier</h1>
+        <h1 style='font-family: Arial; font-size: 24px;'>KORTUC Study DICOM Modifier</h1>
     </div>
 """, unsafe_allow_html=True)
 
