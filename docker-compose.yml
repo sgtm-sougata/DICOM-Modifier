@@ -1,14 +1,16 @@
-version: '3'
 
 services:
   web:
-    image: sougatamaity/dicom-modification:latest
-    container_name: dicom_modification
+    image: sougatamaity/dicom-modification:v1
+    container_name: kms_dcm_modification
     ports:
-      - "8082:8501"
+      - "8099:8501"
     volumes: 
-      - dicom_modification:/app
-    restart: always 
+      - kms_dcm_modification:/app
+    env_file:
+      - stack.env
+ 
+    restart: always
 
 volumes:
-  dicom_modification:
+  kms_dcm_modification:
