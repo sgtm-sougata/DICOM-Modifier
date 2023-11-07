@@ -70,16 +70,16 @@ def create_modified_zip(zip_file, new_name, new_id):
 
 # Streamlit app
 def main():
-    st.markdown(
-        """
-        <div style='display: flex; align-items: center;'>
-            <h1 style='font-family: Arial; font-size: 24px;'>KOTUC Study DICOM Modification</h1>
-        </div><br>
-        """, unsafe_allow_html=True,
-        )
+    # st.markdown(
+    #     """
+    #     <div style='display: flex; align-items: center;'>
+    #         <h1 style='font-family: Arial; font-size: 24px;'>KOTUC Study DICOM Modification</h1>
+    #     </div><br>
+    #     """, unsafe_allow_html=True,
+    #     )
     session = login_form(
         url=os.getenv("url"),
-        apiKey=os.getenv("api_key")
+        apiKey=os.getenv("apiKey")
         # providers=["apple", "facebook", "github", "google"],
     )
     if not session:
