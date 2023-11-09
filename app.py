@@ -97,7 +97,7 @@ def main():
         """
         <div style='display: flex; align-items: center;'>
             <img src='https://img.icons8.com/fluency/48/edit-link.png' style='width:48px;height:48px;'>
-            <h1 style='font-family: Arial; font-size: 24px;'>DICOM Modifier</h1>
+            <h1 style='font-family: Arial; font-size: 24px;'>DICOM Modifier for KORTUC trial</h1>
         </div>
         """, unsafe_allow_html=True,
         )
