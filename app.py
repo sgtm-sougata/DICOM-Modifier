@@ -116,7 +116,7 @@ def main():
                         BytesIO(uploaded_file.read()), new_name, new_id
                     )
                     if modified_zip:
-                        st.write("Modification complete.")
+                        st.write("Modification complete waiting for the download url")
                         with open(modified_zip.name, "rb") as f:
                             bytes_data = f.read()
                             b64 = base64.b64encode(bytes_data).decode()
