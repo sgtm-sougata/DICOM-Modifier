@@ -27,7 +27,7 @@ jobs:
         pip install -r requirements.txt
     - name: Build Docker image
       run: |
-        docker build -t sougatamaity/dicom-modification:v3 .
+        docker build -t sougatamaity/kms:v1 .
     - name: Push Docker image to Docker Hub
       run: |
         echo "${{ secrets.DOCKERP }}" | docker login -u "sougatamaity" --password-stdin
