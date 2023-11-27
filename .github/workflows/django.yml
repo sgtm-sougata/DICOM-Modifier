@@ -31,4 +31,4 @@ jobs:
     - name: Push Docker image to Docker Hub
       run: |
         echo "${{ secrets.DOCKERP }}" | docker login -u "sougatamaity" --password-stdin
-        docker push sougatamaity/dicom-modification:v3
+        docker push sougatamaity/kms:v1
