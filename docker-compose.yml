@@ -1,7 +1,7 @@
 
 services:
   web:
-    image: sougatamaity/dicom-modification:v1
+    image: sougatamaity/kms:v1
     container_name: kms_dcm_modification
     ports:
       - "8099:8501"
