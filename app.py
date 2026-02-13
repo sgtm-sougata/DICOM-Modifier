@@ -6,7 +6,6 @@ import zipfile
 import base64
 import streamlit as st
 import pydicom
-from streamlit_supabase_auth import login_form, logout_button
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -102,123 +101,139 @@ def clean_up(extract_dir):
 
 # Streamlit app
 def main():
-    session = login_form(
-        url=os.getenv("url"),
-        apiKey=os.getenv("apiKey"),
+    # Local authentication using environment variables
+    username = os.getenv("USERNAME")
+    password = os.getenv("PASSWORD")
+    
+    if not username or not password:
+        st.error("Please set USERNAME and PASSWORD in your .env file")
+        st.stop()
+    
+    # Check if authenticated
+    if not st.session_state.get("authenticated", False):
+        # Create login form
+        st.title("Login")
+        login_username = st.text_input("Username", type="default")
+        login_password = st.text_input("Password", type="password")
+        
+        if st.button("Login"):
+            if login_username == username and login_password == password:
+                st.session_state.authenticated = True
+                st.success("Login successful!")
+                st.rerun()
+            else:
+                st.error("Invalid username or password")
+        st.stop()
+    
+    st.markdown(
+        """
+    <div style='display: flex; align-items: center;'>
+        <h1 style='font-family: Arial; font-size: 34px;'>KMS</h1>
+    </div><br>
+    """,
+        unsafe_allow_html=True,
     )
-    if not session:
-        return
-    else:
-        st.markdown(
-            """
-        <div style='display: flex; align-items: center;'>
-            <h1 style='font-family: Arial; font-size: 34px;'>KMS</h1>
-        </div><br>
-        """,
-            unsafe_allow_html=True,
-        )
 
-        col1, col2 = st.columns(2)
-        with col1:
-            st.write(f"Welcome {session['user']['email']}")
-        with col2:
-            logout_button(
-                url=os.getenv("url"), 
-                apiKey=os.getenv("apiKey")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.write(f"Welcome {username}")
+    with col2:
+        if st.button("Logout"):
+            st.session_state.authenticated = False
+            st.rerun()
+
+    extract_dir_main = os.path.join(os.getcwd(), "dicom")
+
+    # Create a form for user input
+    uploaded_file = st.file_uploader("Upload a zip file", type=["zip"])
+    patient_name = st.text_input("Enter New Patient Name (format: 07_5119_001)")
+    patient_id = st.text_input(
+        "Enter New Patient ID (format: 07_5119_001_20231103)"
+    )
+
+    # Check and display messages for patient name and ID format
+    if patient_name and not re.match(r"^\d{2}_\d{4}_\d{3}$", patient_name):
+        st.warning("Please enter a valid Patient Name in the specified format.")
+    if patient_id and not re.match(r"^\d{2}_\d{4}_\d{3}_\d{8}$", patient_id):
+        st.warning("Please enter a valid Patient ID in the specified format.")
+
+    # Progress bars
+
+    # Process button to trigger operations (enabled only if name and ID are valid)
+    if st.button(
+        "Process",
+        disabled=(
+            uploaded_file is None
+            or not re.match(r"^\d{2}_\d{4}_\d{3}$", patient_name)
+            or not re.match(r"^\d{2}_\d{4}_\d{3}_\d{8}$", patient_id)
+        ),
+    ):
+        progress_bar_extract = st.progress(0.0)
+        progress_text_extract = st.empty()  # Empty element for updating text
+        progress_bar_process = st.progress(0.0)
+        progress_text_process = st.empty()  # Empty element for updating text
+
+        if (
+            uploaded_file is not None
+            and re.match(r"^\d{2}_\d{4}_\d{3}$", patient_name)
+            and re.match(r"^\d{2}_\d{4}_\d{3}_\d{8}$", patient_id)
+        ):
+            # Specify the extraction directory
+            extract_dir = os.path.join(extract_dir_main, "upload")
+
+            # Extract the uploaded zip file with progress bar
+            extract_zip(
+                uploaded_file,
+                extract_dir,
+                progress_bar_extract,
+                progress_text_extract,
             )
 
-        extract_dir_main = os.path.join(os.getcwd(), "dicom")
+            # Move all DICOM files to a second folder
+            move_dir = os.path.join(extract_dir_main, "move")
+            move_dicom_files(extract_dir, move_dir)
 
-        # Create a form for user input
-        uploaded_file = st.file_uploader("Upload a zip file", type=["zip"])
-        patient_name = st.text_input("Enter New Patient Name (format: 07_5119_001)")
-        patient_id = st.text_input(
-            "Enter New Patient ID (format: 07_5119_001_20231103)"
-        )
+            # Perform custom operation with progress bar
+            progress_bar_process.progress(0.0)
+            progress_text_process.text("Processed: 0/0 files")
+            perform_custom_operation(
+                move_dir,
+                patient_id,
+                patient_name,
+                progress_bar_process,
+                progress_text_process,
+            )
 
-        # Check and display messages for patient name and ID format
-        if patient_name and not re.match(r"^\d{2}_\d{4}_\d{3}$", patient_name):
-            st.warning("Please enter a valid Patient Name in the specified format.")
-        if patient_id and not re.match(r"^\d{2}_\d{4}_\d{3}_\d{8}$", patient_id):
-            st.warning("Please enter a valid Patient ID in the specified format.")
-
-        # Progress bars
-
-        # Process button to trigger operations (enabled only if name and ID are valid)
-        if st.button(
-            "Process",
-            disabled=(
-                uploaded_file is None
-                or not re.match(r"^\d{2}_\d{4}_\d{3}$", patient_name)
-                or not re.match(r"^\d{2}_\d{4}_\d{3}_\d{8}$", patient_id)
-            ),
-        ):
-            progress_bar_extract = st.progress(0.0)
-            progress_text_extract = st.empty()  # Empty element for updating text
-            progress_bar_process = st.progress(0.0)
-            progress_text_process = st.empty()  # Empty element for updating text
-
-            if (
-                uploaded_file is not None
-                and re.match(r"^\d{2}_\d{4}_\d{3}$", patient_name)
-                and re.match(r"^\d{2}_\d{4}_\d{3}_\d{8}$", patient_id)
-            ):
-                # Specify the extraction directory
-                extract_dir = os.path.join(extract_dir_main, "upload")
-
-                # Extract the uploaded zip file with progress bar
-                extract_zip(
-                    uploaded_file,
-                    extract_dir,
-                    progress_bar_extract,
-                    progress_text_extract,
-                )
-
-                # Move all DICOM files to a second folder
-                move_dir = os.path.join(extract_dir_main, "move")
-                move_dicom_files(extract_dir, move_dir)
-
-                # Perform custom operation with progress bar
-                progress_bar_process.progress(0.0)
-                progress_text_process.text("Processed: 0/0 files")
-                perform_custom_operation(
-                    move_dir,
-                    patient_id,
-                    patient_name,
-                    progress_bar_process,
-                    progress_text_process,
-                )
-
-                # Create a new zip file
-
-                # Provide a clickable and downloadable link
-
-            else:
-                st.warning(
-                    "Please upload a zip file and enter both valid Patient Name and Patient ID."
-                )
-
-            # Clean up the extraction folders after the download
+            # Create a new zip file
 
             # Provide a clickable and downloadable link
-            zip_name = patient_id if patient_id else "default_name"
-            extract_dir_output = os.path.join(extract_dir_main, "output")
 
-            with st.spinner("Creating Archive..."):
-                create_zip(
-                    extract_dir_output,
-                    zip_name,
-                    os.path.join(extract_dir_main, "save_file"),
-                )
+        else:
+            st.warning(
+                "Please upload a zip file and enter both valid Patient Name and Patient ID."
+            )
 
-            zip_file_path = os.path.join(extract_dir_output, f"{zip_name}.zip")
-            with open(zip_file_path, "rb") as file:
-                btn = st.download_button(
-                    label="Download Zip",
-                    data=file,
-                    file_name=f"{zip_name}.zip",
-                    mime="zip",
-                )
+        # Clean up the extraction folders after the download
+
+        # Provide a clickable and downloadable link
+        zip_name = patient_id if patient_id else "default_name"
+        extract_dir_output = os.path.join(extract_dir_main, "output")
+
+        with st.spinner("Creating Archive..."):
+            create_zip(
+                extract_dir_output,
+                zip_name,
+                os.path.join(extract_dir_main, "save_file"),
+            )
+
+        zip_file_path = os.path.join(extract_dir_output, f"{zip_name}.zip")
+        with open(zip_file_path, "rb") as file:
+            btn = st.download_button(
+                label="Download Zip",
+                data=file,
+                file_name=f"{zip_name}.zip",
+                mime="zip",
+            )
 
 
 if __name__ == "__main__":
