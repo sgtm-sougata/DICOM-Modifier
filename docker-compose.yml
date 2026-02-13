@@ -8,7 +8,7 @@ services:
     volumes: 
       - kms_dcm_modification:/app
     env_file:
-      - stack.env
+      - .env
  
     restart: always
 

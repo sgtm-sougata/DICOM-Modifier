@@ -102,11 +102,11 @@ def clean_up(extract_dir):
 # Streamlit app
 def main():
     # Local authentication using environment variables
-    username = os.getenv("USERNAME")
-    password = os.getenv("PASSWORD")
+    username = os.getenv("APP_USERNAME")
+    password = os.getenv("APP_PASSWORD")
     
     if not username or not password:
-        st.error("Please set USERNAME and PASSWORD in your .env file")
+        st.error("Please set APP_USERNAME and APP_PASSWORD in your .env file")
         st.stop()
     
     # Check if authenticated
